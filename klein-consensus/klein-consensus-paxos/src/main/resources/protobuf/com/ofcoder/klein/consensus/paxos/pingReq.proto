@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package com.ofcoder.klein.consensus.paxos;
+
+import "nodeState.proto";
+import "abstractBaseReq.proto";
+
+option java_multiple_files = true;
+option java_package = "com.ofcoder.klein.consensus.paxos.rpc.generated";
+option java_outer_classname = "PingReq";
+
+message PingReqProto {
+    AbstractBaseReqProto abstractBaseReq = 1;
+    NodeStateProto nodeState = 2;
+    bool probe = 3;
+    int64 timestampMs = 4;
+}

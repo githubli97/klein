@@ -16,6 +16,7 @@
  */
 package com.ofcoder.klein.consensus.paxos.rpc;
 
+import com.ofcoder.klein.consensus.paxos.Constant;
 import java.nio.ByteBuffer;
 
 import org.slf4j.Logger;
@@ -27,8 +28,7 @@ import com.ofcoder.klein.consensus.facade.AbstractRpcProcessor;
 import com.ofcoder.klein.consensus.facade.Cluster;
 import com.ofcoder.klein.consensus.paxos.PaxosNode;
 import com.ofcoder.klein.consensus.paxos.core.sm.MemberRegistry;
-import com.ofcoder.klein.consensus.paxos.rpc.vo.ElasticReq;
-import com.ofcoder.klein.consensus.paxos.rpc.vo.ElasticRes;
+import com.ofcoder.klein.consensus.paxos.rpc.generated.ElasticReqProto;
 import com.ofcoder.klein.rpc.facade.RpcContext;
 
 /**
@@ -36,7 +36,7 @@ import com.ofcoder.klein.rpc.facade.RpcContext;
  *
  * @author 释慧利
  */
-public class ElasticProcessor extends AbstractRpcProcessor<ElasticReq> {
+public class ElasticProcessor extends AbstractRpcProcessor<ElasticReqProto> {
     private static final Logger LOG = LoggerFactory.getLogger(ElasticProcessor.class);
     private final PaxosNode self;
     private final Cluster cluster;
@@ -48,20 +48,20 @@ public class ElasticProcessor extends AbstractRpcProcessor<ElasticReq> {
 
     @Override
     public String service() {
-        return ElasticReq.class.getSimpleName();
+        return ElasticReqProto.class.getSimpleName();
     }
 
     @Override
-    public void handleRequest(final ElasticReq request, final RpcContext context) {
+    public void handleRequest(final ElasticReqProto request, final RpcContext context) {
 
         switch (request.getOp()) {
-            case ElasticReq.LAUNCH:
+            case Constant.ELASTIC_REQ_OP_LAUNCH:
                 if (!MemberRegistry.getInstance().getMemberConfiguration().isValid(request.getEndpoint().getId())) {
                     cluster.changeMember(Lists.newArrayList(request.getEndpoint()), Lists.newArrayList());
                 }
                 // else: i'm already in the member list.
                 break;
-            case ElasticReq.SHUTDOWN:
+            case Constant.ELASTIC_REQ_OP_SHUTDOWN:
                 if (MemberRegistry.getInstance().getMemberConfiguration().isValid(request.getEndpoint().getId())) {
                     cluster.changeMember(Lists.newArrayList(), Lists.newArrayList(request.getEndpoint()));
                 }

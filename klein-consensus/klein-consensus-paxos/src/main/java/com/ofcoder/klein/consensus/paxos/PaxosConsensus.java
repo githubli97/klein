@@ -39,8 +39,9 @@ import com.ofcoder.klein.consensus.paxos.rpc.PreElectProcessor;
 import com.ofcoder.klein.consensus.paxos.rpc.PrepareProcessor;
 import com.ofcoder.klein.consensus.paxos.rpc.RedirectProcessor;
 import com.ofcoder.klein.consensus.paxos.rpc.SnapSyncProcessor;
-import com.ofcoder.klein.consensus.paxos.rpc.vo.ElasticReq;
-import com.ofcoder.klein.consensus.paxos.rpc.vo.ElasticRes;
+import com.ofcoder.klein.consensus.paxos.rpc.generated.ElasticReqProto;
+import com.ofcoder.klein.consensus.paxos.rpc.generated.ElasticResProto;
+import com.ofcoder.klein.consensus.paxos.rpc.generated.EndpointProto;
 import com.ofcoder.klein.rpc.facade.Endpoint;
 import com.ofcoder.klein.rpc.facade.RpcClient;
 import com.ofcoder.klein.rpc.facade.RpcEngine;
@@ -149,14 +150,20 @@ public class PaxosConsensus implements Consensus {
 
     private void joinCluster() {
         // add member
-        ElasticReq req = new ElasticReq();
-        req.setEndpoint(self.getSelf());
-        req.setOp(ElasticReq.LAUNCH);
+        ElasticReqProto req = ElasticReqProto.newBuilder()
+            .setEndpoint(EndpointProto.newBuilder()
+                .setId(self.getSelf().getId())
+                .setIp(self.getSelf().getIp())
+                .setPort(self.getSelf().getPort())
+                .setOutsider(self.getSelf().isOutsider())
+                .build())
+            .setOp(Constant.ELASTIC_REQ_OP_LAUNCH)
+            .build();
 
         for (Endpoint endpoint : MemberRegistry.getInstance().getMemberConfiguration().getAllMembers()) {
             try {
-                ElasticRes res = client.sendRequestSync(endpoint, req);
-                if (res.isResult()) {
+                ElasticResProto res = client.sendRequestSync(endpoint, req);
+                if (res.getResult()) {
                     return;
                 }
             } catch (Exception e) {
@@ -167,14 +174,20 @@ public class PaxosConsensus implements Consensus {
 
     private void exitCluster() {
         // remove member
-        ElasticReq req = new ElasticReq();
-        req.setEndpoint(self.getSelf());
-        req.setOp(ElasticReq.SHUTDOWN);
+        ElasticReqProto req = ElasticReqProto.newBuilder()
+            .setEndpoint(EndpointProto.newBuilder()
+                .setId(self.getSelf().getId())
+                .setIp(self.getSelf().getIp())
+                .setPort(self.getSelf().getPort())
+                .setOutsider(self.getSelf().isOutsider())
+                .build())
+            .setOp(Constant.ELASTIC_REQ_OP_SHUTDOWN)
+            .build();
 
         for (Endpoint endpoint : MemberRegistry.getInstance().getMemberConfiguration().getAllMembers()) {
             try {
-                ElasticRes res = client.sendRequestSync(endpoint, req);
-                if (res.isResult()) {
+                ElasticResProto res = client.sendRequestSync(endpoint, req);
+                if (res.getResult()) {
                     return;
                 }
             } catch (Exception e) {

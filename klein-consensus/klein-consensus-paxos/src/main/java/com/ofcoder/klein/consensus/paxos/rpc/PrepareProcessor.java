@@ -26,7 +26,7 @@ import com.ofcoder.klein.consensus.facade.AbstractRpcProcessor;
 import com.ofcoder.klein.consensus.paxos.PaxosNode;
 import com.ofcoder.klein.consensus.paxos.core.RuntimeAccessor;
 import com.ofcoder.klein.consensus.paxos.core.sm.MemberRegistry;
-import com.ofcoder.klein.consensus.paxos.rpc.vo.PrepareReq;
+import com.ofcoder.klein.consensus.paxos.rpc.generated.PrepareReqProto;
 import com.ofcoder.klein.consensus.paxos.rpc.vo.PrepareRes;
 import com.ofcoder.klein.rpc.facade.RpcContext;
 
@@ -35,7 +35,7 @@ import com.ofcoder.klein.rpc.facade.RpcContext;
  *
  * @author 释慧利
  */
-public class PrepareProcessor extends AbstractRpcProcessor<PrepareReq> {
+public class PrepareProcessor extends AbstractRpcProcessor<PrepareReqProto> {
     private static final Logger LOG = LoggerFactory.getLogger(PrepareProcessor.class);
 
     public PrepareProcessor(final PaxosNode self) {
@@ -44,11 +44,11 @@ public class PrepareProcessor extends AbstractRpcProcessor<PrepareReq> {
 
     @Override
     public String service() {
-        return PrepareReq.class.getSimpleName();
+        return PrepareReqProto.class.getSimpleName();
     }
 
     @Override
-    public void handleRequest(final PrepareReq request, final RpcContext context) {
+    public void handleRequest(final PrepareReqProto request, final RpcContext context) {
 
         if (!MemberRegistry.getInstance().getMemberConfiguration().isValid(request.getNodeId())) {
             LOG.error("msg type: prepare, from nodeId[{}] not in my membership(or i'm null membership), skip this message. ",

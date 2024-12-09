@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package com.ofcoder.klein.consensus.paxos;
+
+import "nodeState.proto";
+
+option java_multiple_files = true;
+option java_outer_classname = "AcceptRes";
+option java_package = "com.ofcoder.klein.consensus.paxos.rpc.generated";
+
+message AcceptResProto {
+    string nodeId = 1;
+    bool result = 2;
+    int64 curProposalNo = 3;
+    int64 curInstanceId = 4;
+
+    string instanceState = 5;
+    NodeStateProto nodeState = 6;
+}

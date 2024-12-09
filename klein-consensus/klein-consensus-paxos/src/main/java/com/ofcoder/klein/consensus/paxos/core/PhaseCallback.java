@@ -16,7 +16,7 @@
  */
 package com.ofcoder.klein.consensus.paxos.core;
 
-import com.ofcoder.klein.consensus.paxos.rpc.vo.NodeState;
+import com.ofcoder.klein.consensus.paxos.rpc.generated.NodeStateProto;
 
 /**
  * Phase Callback.
@@ -34,7 +34,7 @@ public interface PhaseCallback {
     interface AcceptPhaseCallback {
         void granted(ProposeContext context);
 
-        void learn(ProposeContext context, NodeState target);
+        void learn(ProposeContext context, NodeStateProto target);
 
     }
 

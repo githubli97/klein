@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package com.ofcoder.klein.consensus.paxos;
+
+import "endpoint.proto";
+
+option java_multiple_files = true;
+option java_package = "com.ofcoder.klein.consensus.paxos.rpc.generated";
+option java_outer_classname = "ElasticReq";
+
+message ElasticReqProto {
+     EndpointProto endpoint = 1;
+     int32 op = 2;
+}

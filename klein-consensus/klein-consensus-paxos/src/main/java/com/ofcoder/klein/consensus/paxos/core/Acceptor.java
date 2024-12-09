@@ -18,9 +18,9 @@ package com.ofcoder.klein.consensus.paxos.core;
 
 import com.ofcoder.klein.common.Role;
 import com.ofcoder.klein.consensus.facade.config.ConsensusProp;
-import com.ofcoder.klein.consensus.paxos.rpc.vo.AcceptReq;
-import com.ofcoder.klein.consensus.paxos.rpc.vo.AcceptRes;
-import com.ofcoder.klein.consensus.paxos.rpc.vo.PrepareReq;
+import com.ofcoder.klein.consensus.paxos.rpc.generated.AcceptReqProto;
+import com.ofcoder.klein.consensus.paxos.rpc.generated.AcceptResProto;
+import com.ofcoder.klein.consensus.paxos.rpc.generated.PrepareReqProto;
 import com.ofcoder.klein.consensus.paxos.rpc.vo.PrepareRes;
 
 /**
@@ -36,7 +36,7 @@ public interface Acceptor extends Role<ConsensusProp> {
      * @param isSelf from self
      * @return response
      */
-    AcceptRes handleAcceptRequest(AcceptReq req, boolean isSelf);
+    AcceptResProto handleAcceptRequest(AcceptReqProto req, boolean isSelf);
 
     /**
      * Process the Prepare message from Proposer.
@@ -45,5 +45,5 @@ public interface Acceptor extends Role<ConsensusProp> {
      * @param isSelf from self
      * @return response
      */
-    PrepareRes handlePrepareRequest(PrepareReq req, boolean isSelf);
+    PrepareRes handlePrepareRequest(PrepareReqProto req, boolean isSelf);
 }

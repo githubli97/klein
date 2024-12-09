@@ -14,14 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.ofcoder.klein.consensus.paxos.rpc.vo;
 
-import java.io.Serializable;
+package com.ofcoder.klein.consensus.paxos;
 
-/**
- * confirm response data.
- *
- * @author far.liu
- */
-public class ConfirmRes implements Serializable {
+public final class Constant {
+    public static final byte ELASTIC_REQ_OP_LAUNCH = 0x01;
+    public static final byte ELASTIC_REQ_OP_SHUTDOWN = 0x00;
+
+    private Constant() {
+    }
 }

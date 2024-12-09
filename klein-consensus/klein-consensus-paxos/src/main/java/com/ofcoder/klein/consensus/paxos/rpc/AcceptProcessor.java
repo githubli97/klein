@@ -26,8 +26,8 @@ import com.ofcoder.klein.consensus.facade.AbstractRpcProcessor;
 import com.ofcoder.klein.consensus.paxos.PaxosNode;
 import com.ofcoder.klein.consensus.paxos.core.RuntimeAccessor;
 import com.ofcoder.klein.consensus.paxos.core.sm.MemberRegistry;
-import com.ofcoder.klein.consensus.paxos.rpc.vo.AcceptReq;
-import com.ofcoder.klein.consensus.paxos.rpc.vo.AcceptRes;
+import com.ofcoder.klein.consensus.paxos.rpc.generated.AcceptReqProto;
+import com.ofcoder.klein.consensus.paxos.rpc.generated.AcceptResProto;
 import com.ofcoder.klein.rpc.facade.RpcContext;
 
 /**
@@ -35,7 +35,7 @@ import com.ofcoder.klein.rpc.facade.RpcContext;
  *
  * @author 释慧利
  */
-public class AcceptProcessor extends AbstractRpcProcessor<AcceptReq> {
+public class AcceptProcessor extends AbstractRpcProcessor<AcceptReqProto> {
     private static final Logger LOG = LoggerFactory.getLogger(AcceptProcessor.class);
 
     public AcceptProcessor(final PaxosNode self) {
@@ -44,18 +44,18 @@ public class AcceptProcessor extends AbstractRpcProcessor<AcceptReq> {
 
     @Override
     public String service() {
-        return AcceptReq.class.getSimpleName();
+        return AcceptReqProto.class.getSimpleName();
     }
 
     @Override
-    public void handleRequest(final AcceptReq request, final RpcContext context) {
+    public void handleRequest(final AcceptReqProto request, final RpcContext context) {
 
-        if (!MemberRegistry.getInstance().getMemberConfiguration().isValid(request.getNodeId())) {
+        if (!MemberRegistry.getInstance().getMemberConfiguration().isValid(request.getAbstractBaseReq().getNodeId())) {
             LOG.error("msg type: accept, from nodeId[{}] not in my membership(or i'm null membership), skip this message. ",
-                    request.getNodeId());
+                    request.getAbstractBaseReq().getNodeId());
             return;
         }
-        AcceptRes res = RuntimeAccessor.getAcceptor().handleAcceptRequest(request, false);
+        AcceptResProto res = RuntimeAccessor.getAcceptor().handleAcceptRequest(request, false);
         context.response(ByteBuffer.wrap(Hessian2Util.serialize(res)));
 
     }

@@ -59,10 +59,10 @@ import com.ofcoder.klein.consensus.paxos.PaxosNode;
 import com.ofcoder.klein.consensus.paxos.Proposal;
 import com.ofcoder.klein.consensus.paxos.core.sm.MemberRegistry;
 import com.ofcoder.klein.consensus.paxos.core.sm.PaxosMemberConfiguration;
-import com.ofcoder.klein.consensus.paxos.rpc.vo.AcceptReq;
-import com.ofcoder.klein.consensus.paxos.rpc.vo.AcceptRes;
-import com.ofcoder.klein.consensus.paxos.rpc.vo.NodeState;
-import com.ofcoder.klein.consensus.paxos.rpc.vo.PrepareReq;
+import com.ofcoder.klein.consensus.paxos.rpc.generated.AcceptReqProto;
+import com.ofcoder.klein.consensus.paxos.rpc.generated.AcceptResProto;
+import com.ofcoder.klein.consensus.paxos.rpc.generated.NodeStateProto;
+import com.ofcoder.klein.consensus.paxos.rpc.generated.PrepareReqProto;
 import com.ofcoder.klein.consensus.paxos.rpc.vo.PrepareRes;
 import com.ofcoder.klein.rpc.facade.Endpoint;
 import com.ofcoder.klein.rpc.facade.RpcClient;
@@ -187,7 +187,7 @@ public class ProposerImpl implements Proposer {
      * @param ctxt              Negotiation Context
      * @param callback          Callback of accept phase,
      *                          if the majority approved accept, call {@link PhaseCallback.AcceptPhaseCallback#granted(ProposeContext)}
-     *                          if an acceptor returns a confirmed instance, call {@link PhaseCallback.AcceptPhaseCallback#learn(ProposeContext, NodeState)}
+     *                          if an acceptor returns a confirmed instance, call {@link PhaseCallback.AcceptPhaseCallback#learn(ProposeContext, NodeStateProto)}
      */
     private void accept(final long grantedProposalNo, final ProposeContext ctxt, final PhaseCallback.AcceptPhaseCallback callback) {
         if (!runningInstance.add(ctxt.getInstanceId())) {
@@ -218,7 +218,7 @@ public class ProposerImpl implements Proposer {
         ctxt.setGrantedProposalNo(grantedProposalNo);
 
         final PaxosMemberConfiguration memberConfiguration = ctxt.getMemberConfiguration().createRef();
-        final AcceptReq req = AcceptReq.Builder.anAcceptReq()
+        final AcceptReqProto req = AcceptReqProto.Builder.anAcceptReq()
                 .nodeId(self.getSelf().getId())
                 .instanceId(ctxt.getInstanceId())
                 .proposalNo(ctxt.getGrantedProposalNo())
@@ -228,12 +228,12 @@ public class ProposerImpl implements Proposer {
                 .build();
 
         // for self
-        AcceptRes res = RuntimeAccessor.getAcceptor().handleAcceptRequest(req, true);
+        AcceptResProto res = RuntimeAccessor.getAcceptor().handleAcceptRequest(req, true);
         handleAcceptResponse(ctxt, callback, res, self.getSelf());
 
         // for other members
         memberConfiguration.getMembersWithout(self.getSelf().getId()).forEach(it -> {
-            client.sendRequestAsync(it, req, new AbstractInvokeCallback<AcceptRes>() {
+            client.sendRequestAsync(it, req, new AbstractInvokeCallback<AcceptResProto>() {
                 @Override
                 public void error(final Throwable err) {
                     LOG.error("send accept msg to node-{}, proposalNo: {}, instanceId: {}, occur exception, {}", it.getId(), grantedProposalNo, ctxt.getInstanceId(), err.getMessage());
@@ -248,7 +248,7 @@ public class ProposerImpl implements Proposer {
                 }
 
                 @Override
-                public void complete(final AcceptRes result) {
+                public void complete(final AcceptResProto result) {
                     handleAcceptResponse(ctxt, callback, result, it);
                 }
             }, acceptTimeout);
@@ -257,7 +257,7 @@ public class ProposerImpl implements Proposer {
     }
 
     private void handleAcceptResponse(final ProposeContext ctxt, final PhaseCallback.AcceptPhaseCallback callback,
-                                      final AcceptRes result, final Endpoint it) {
+                                      final AcceptResProto result, final Endpoint it) {
         LOG.info("handling node-{}'s accept response, result: {}, local.proposalNo: {}, instanceId: {}, remote.proposalNo: {}",
                 result.getNodeId(), result.getResult(), ctxt.getGrantedProposalNo(), ctxt.getInstanceId(), result.getCurProposalNo());
         self.updateCurProposalNo(result.getCurProposalNo());
@@ -380,7 +380,7 @@ public class ProposerImpl implements Proposer {
 
         LOG.info("start prepare phase, the {} retry, proposalNo: {}", ctxt.getTimes(), proposalNo);
 
-        PrepareReq req = PrepareReq.Builder.aPrepareReq()
+        PrepareReqProto req = PrepareReqProto.Builder.aPrepareReq()
                 .nodeId(self.getSelf().getId())
                 .proposalNo(proposalNo)
                 .memberConfigurationVersion(memberConfiguration.getVersion())
@@ -541,7 +541,7 @@ public class ProposerImpl implements Proposer {
         }
 
         @Override
-        public void learn(final ProposeContext context, final NodeState target) {
+        public void learn(final ProposeContext context, final NodeStateProto target) {
             LOG.debug("accept finds that the instance is confirmed. proposalNo: {}, instance: {}, target: {}", context.getGrantedProposalNo(), context.getInstanceId(), target.getNodeId());
             ProposerImpl.this.seenInstances.remove(context.getInstanceId());
 

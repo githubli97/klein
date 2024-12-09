@@ -126,6 +126,7 @@ public interface RpcClient {
      * @return invoke result
      */
     default <R> R sendRequestSync(Endpoint target, Serializable request, long timeoutMs) {
+
         InvokeParam param = InvokeParam.Builder.anInvokeParam()
                 .service(request.getClass().getSimpleName())
                 .method(RpcProcessor.KLEIN)

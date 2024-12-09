@@ -45,11 +45,11 @@ import com.ofcoder.klein.consensus.paxos.PaxosNode;
 import com.ofcoder.klein.consensus.paxos.Proposal;
 import com.ofcoder.klein.consensus.paxos.core.sm.MemberRegistry;
 import com.ofcoder.klein.consensus.paxos.core.sm.PaxosMemberConfiguration;
-import com.ofcoder.klein.consensus.paxos.rpc.vo.ConfirmReq;
+import com.ofcoder.klein.consensus.paxos.rpc.generated.ConfirmReqProto;
 import com.ofcoder.klein.consensus.paxos.rpc.vo.LearnReq;
 import com.ofcoder.klein.consensus.paxos.rpc.vo.LearnRes;
-import com.ofcoder.klein.consensus.paxos.rpc.vo.NodeState;
-import com.ofcoder.klein.consensus.paxos.rpc.vo.SnapSyncReq;
+import com.ofcoder.klein.consensus.paxos.rpc.generated.NodeStateProto;
+import com.ofcoder.klein.consensus.paxos.rpc.generated.SnapSyncReqProto;
 import com.ofcoder.klein.consensus.paxos.rpc.vo.SnapSyncRes;
 import com.ofcoder.klein.consensus.paxos.rpc.vo.Sync;
 import com.ofcoder.klein.rpc.facade.Endpoint;
@@ -230,11 +230,11 @@ public class LearnerImpl implements Learner {
 
         PaxosMemberConfiguration configuration = memberConfig.createRef();
 
-        ConfirmReq req = ConfirmReq.Builder.aConfirmReq()
-                .nodeId(self.getSelf().getId())
-                .proposalNo(curProposalNo)
-                .instanceId(instanceId)
-                .checksum(checksum)
+        ConfirmReqProto req = ConfirmReqProto.newBuilder()
+                .setNodeId(self.getSelf().getId())
+                .setProposalNo(curProposalNo)
+                .setInstanceId(instanceId)
+                .setChecksum(checksum)
                 .build();
 
         // for self
@@ -262,7 +262,7 @@ public class LearnerImpl implements Learner {
     }
 
     @Override
-    public void alignData(final NodeState state) {
+    public void alignData(final NodeStateProto state) {
         final Endpoint target = memberConfig.getEndpointById(state.getNodeId());
         if (target == null) {
             return;
@@ -297,7 +297,7 @@ public class LearnerImpl implements Learner {
         }
     }
 
-    private boolean handleConfirmRequest(final ConfirmReq req) {
+    private boolean handleConfirmRequest(final ConfirmReqProto req) {
         LOG.info("processing the confirm request from node-{}, instance: {}", req.getNodeId(), req.getInstanceId());
 
         if (req.getInstanceId() <= getLastCheckpoint()) {
@@ -346,7 +346,7 @@ public class LearnerImpl implements Learner {
     }
 
     @Override
-    public void handleConfirmRequest(final ConfirmReq req, final boolean isSelf) {
+    public void handleConfirmRequest(final ConfirmReqProto req, final boolean isSelf) {
         if (handleConfirmRequest(req)) {
             // apply statemachine
             apply(req.getInstanceId());
@@ -478,8 +478,8 @@ public class LearnerImpl implements Learner {
     }
 
     @Override
-    public SnapSyncRes handleSnapSyncRequest(final SnapSyncReq req) {
-        LOG.info("processing the pull snap message from node-{}", req.getNodeId());
+    public SnapSyncRes handleSnapSyncRequest(final SnapSyncReqProto req) {
+        LOG.info("processing the pull snap message from node-{}", req.getAbstractBaseReq().getNodeId());
         SnapSyncRes res = SnapSyncRes.Builder.aSnapSyncRes()
                 .images(new HashMap<>())
                 .checkpoint(RuntimeAccessor.getLearner().getLastCheckpoint())

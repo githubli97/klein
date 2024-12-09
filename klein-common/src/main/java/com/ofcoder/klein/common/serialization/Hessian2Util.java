@@ -38,6 +38,7 @@ public class Hessian2Util {
      * @param javaBean object
      * @param <T>      java object type
      * @return serialized data
+     * todo
      */
     public static <T> byte[] serialize(final T javaBean) {
         Hessian2Output ho = null;
@@ -69,6 +70,7 @@ public class Hessian2Util {
      * @param serializeData serialized data
      * @param <T>           java object type
      * @return java object
+     * todo
      */
     @SuppressWarnings("unchecked")
     public static <T> T deserialize(final byte[] serializeData) {

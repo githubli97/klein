@@ -14,28 +14,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.ofcoder.klein.consensus.paxos.core;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.ofcoder.klein.consensus.facade.Command;
 import com.ofcoder.klein.consensus.facade.config.ConsensusProp;
 import com.ofcoder.klein.consensus.paxos.PaxosNode;
 import com.ofcoder.klein.consensus.paxos.core.sm.MemberRegistry;
 import com.ofcoder.klein.consensus.paxos.core.sm.PaxosMemberConfiguration;
-import com.ofcoder.klein.consensus.paxos.rpc.vo.AcceptReq;
-import com.ofcoder.klein.consensus.paxos.rpc.vo.AcceptRes;
-import com.ofcoder.klein.consensus.paxos.rpc.vo.BaseReq;
-import com.ofcoder.klein.consensus.paxos.rpc.vo.NodeState;
-import com.ofcoder.klein.consensus.paxos.rpc.vo.PrepareReq;
+import com.ofcoder.klein.consensus.paxos.rpc.generated.AbstractBaseReqProto;
+import com.ofcoder.klein.consensus.paxos.rpc.generated.AcceptReqProto;
+import com.ofcoder.klein.consensus.paxos.rpc.generated.AcceptResProto;
+import com.ofcoder.klein.consensus.paxos.rpc.generated.NodeStateProto;
+import com.ofcoder.klein.consensus.paxos.rpc.generated.PrepareReqProto;
 import com.ofcoder.klein.consensus.paxos.rpc.vo.PrepareRes;
+import com.ofcoder.klein.consensus.paxos.rpc.vo.ProtoCommand;
 import com.ofcoder.klein.spi.ExtensionLoader;
 import com.ofcoder.klein.storage.facade.Instance;
 import com.ofcoder.klein.storage.facade.LogManager;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Acceptor implement.
@@ -66,29 +67,30 @@ public class AcceptorImpl implements Acceptor {
     }
 
     @Override
-    public AcceptRes handleAcceptRequest(final AcceptReq req, final boolean isSelf) {
-        LOG.info("processing the accept request from node-{}, instanceId: {}, proposalNO: {}, checksum: {}", req.getNodeId(), req.getInstanceId(), req.getProposalNo(), req.getChecksum());
+    public AcceptResProto handleAcceptRequest(final AcceptReqProto req, final boolean isSelf) {
+        LOG.info("processing the accept request from node-{}, instanceId: {}, proposalNO: {}, checksum: {}",
+            req.getAbstractBaseReq().getNodeId(), req.getInstanceId(), req.getAbstractBaseReq().getProposalNo(), req.getChecksum());
 
         final long selfProposalNo = self.getCurProposalNo();
         final long selfInstanceId = self.getCurInstanceId();
         final PaxosMemberConfiguration memberConfiguration = memberConfig.createRef();
         final long selfCheckpoint = RuntimeAccessor.getLearner().getLastCheckpoint();
-        final NodeState selfState = NodeState.Builder.aNodeState()
-                .nodeId(self.getSelf().getId())
-                .maxInstanceId(selfInstanceId)
-                .lastCheckpoint(selfCheckpoint)
-                .lastAppliedInstanceId(RuntimeAccessor.getLearner().getLastAppliedInstanceId())
-                .build();
+        final NodeStateProto selfState = NodeStateProto.newBuilder()
+            .setNodeId(self.getSelf().getId())
+            .setMaxInstanceId(selfInstanceId)
+            .setLastCheckpoint(selfCheckpoint)
+            .setLastAppliedInstanceId(RuntimeAccessor.getLearner().getLastAppliedInstanceId())
+            .build();
 
         if (req.getInstanceId() <= selfCheckpoint || req.getInstanceId() <= RuntimeAccessor.getLearner().getLastAppliedInstanceId()) {
 
-            return AcceptRes.Builder.anAcceptRes()
-                    .nodeId(self.getSelf().getId())
-                    .result(false)
-                    .instanceState(Instance.State.CONFIRMED)
-                    .nodeState(selfState)
-                    .curInstanceId(selfInstanceId)
-                    .curProposalNo(selfProposalNo).build();
+            return AcceptResProto.newBuilder()
+                .setNodeId(self.getSelf().getId())
+                .setResult(false)
+                .setInstanceState(Instance.State.CONFIRMED.name())
+                .setNodeState(selfState)
+                .setCurInstanceId(selfInstanceId)
+                .setCurProposalNo(selfProposalNo).build();
         }
         synchronized (negLock) {
             try {
@@ -97,10 +99,10 @@ public class AcceptorImpl implements Acceptor {
                 Instance<Command> localInstance = logManager.getInstance(req.getInstanceId());
                 if (localInstance == null) {
                     localInstance = Instance.Builder.<Command>anInstance()
-                            .instanceId(req.getInstanceId())
-                            .proposalNo(req.getProposalNo())
-                            .state(Instance.State.PREPARED)
-                            .build();
+                        .instanceId(req.getInstanceId())
+                        .proposalNo(req.getAbstractBaseReq().getProposalNo())
+                        .state(Instance.State.PREPARED)
+                        .build();
                 }
 
                 // This check logic must be in the synchronized block to avoid the following situations
@@ -108,38 +110,39 @@ public class AcceptorImpl implements Acceptor {
                 // T2: pre<proposalNo = 2>                                       ---- granted
                 // T2: acc<proposalNo = 2> check result is true                  ---- granted
                 // T1: overwrites the accept request from T2
-                if (!checkAcceptReqValidity(memberConfiguration, selfProposalNo, req, isSelf)) {
-                    AcceptRes res = AcceptRes.Builder.anAcceptRes()
-                            .nodeId(self.getSelf().getId())
-                            .result(false)
-                            .curProposalNo(selfProposalNo)
-                            .curInstanceId(selfInstanceId)
-                            .instanceState(localInstance.getState())
-                            .nodeState(selfState)
-                            .build();
+                if (!checkAcceptReqValidity(memberConfiguration, selfProposalNo, req.getAbstractBaseReq(), isSelf)) {
+                    AcceptResProto res = AcceptResProto.newBuilder()
+                        .setNodeId(self.getSelf().getId())
+                        .setResult(false)
+                        .setCurProposalNo(selfProposalNo)
+                        .setCurInstanceId(selfInstanceId)
+                        .setInstanceState(localInstance.getState().name())
+                        .setNodeState(selfState)
+                        .build();
                     logManager.updateInstance(localInstance);
                     return res;
                 }
 
-                AcceptRes.Builder resBuilder = AcceptRes.Builder.anAcceptRes()
-                        .nodeId(self.getSelf().getId())
-                        .curInstanceId(selfInstanceId)
-                        .curProposalNo(selfProposalNo);
+                AcceptResProto.Builder resBuilder = AcceptResProto.newBuilder()
+                    .setNodeId(self.getSelf().getId())
+                    .setCurInstanceId(selfInstanceId)
+                    .setCurProposalNo(selfProposalNo);
 
                 if (localInstance.getState() == Instance.State.CONFIRMED) {
-                    resBuilder.result(false)
-                            .instanceState(localInstance.getState())
-                            .nodeState(selfState);
+                    resBuilder.setResult(false)
+                        .setInstanceState(localInstance.getState().name())
+                        .setNodeState(selfState);
                 } else {
                     localInstance.setState(Instance.State.ACCEPTED);
-                    localInstance.setProposalNo(req.getProposalNo());
-                    localInstance.setGrantedValue(req.getData());
+                    localInstance.setProposalNo(req.getAbstractBaseReq().getProposalNo());
+                    localInstance.setGrantedValue(req.getDataList().stream().map(ProtoCommand::new).collect(Collectors.toList()));
                     localInstance.setChecksum(req.getChecksum());
                     logManager.updateInstance(localInstance);
 
-                    resBuilder.result(true)
-                            .instanceState(localInstance.getState())
-                            .nodeState(selfState);
+                    resBuilder
+                        .setResult(true)
+                        .setInstanceState(localInstance.getState().name())
+                        .setNodeState(selfState);
                 }
                 return resBuilder.build();
             } finally {
@@ -151,8 +154,8 @@ public class AcceptorImpl implements Acceptor {
     }
 
     @Override
-    public PrepareRes handlePrepareRequest(final PrepareReq req, final boolean isSelf) {
-        LOG.info("processing the prepare request from node-{}, {}, isSelf: {}", req.getNodeId(), req.getProposalNo(), isSelf);
+    public PrepareRes handlePrepareRequest(final PrepareReqProto req, final boolean isSelf) {
+        LOG.info("processing the prepare request from node-{}, {}, isSelf: {}", req.getAbstractBaseReq().getNodeId(), req.getAbstractBaseReq().getProposalNo(), isSelf);
         synchronized (negLock) {
             final long curProposalNo = self.getCurProposalNo();
             final long curInstanceId = self.getCurInstanceId();
@@ -160,11 +163,11 @@ public class AcceptorImpl implements Acceptor {
             final PaxosMemberConfiguration memberConfiguration = memberConfig.createRef();
 
             PrepareRes.Builder res = PrepareRes.Builder.aPrepareRes()
-                    .nodeId(self.getSelf().getId())
-                    .curProposalNo(curProposalNo)
-                    .curInstanceId(curInstanceId);
+                .nodeId(self.getSelf().getId())
+                .curProposalNo(curProposalNo)
+                .curInstanceId(curInstanceId);
 
-            if (!checkPrepareReqValidity(memberConfiguration, curProposalNo, req, isSelf)) {
+            if (!checkPrepareReqValidity(memberConfiguration, curProposalNo, req.getAbstractBaseReq(), isSelf)) {
                 return res.result(false).instances(new ArrayList<>()).build();
             } else {
                 List<Instance<Command>> instances = logManager.getInstanceNoConfirm();
@@ -174,15 +177,15 @@ public class AcceptorImpl implements Acceptor {
     }
 
     private boolean checkPrepareReqValidity(final PaxosMemberConfiguration paxosMemberConfiguration,
-                                            final long selfProposalNo, final BaseReq req,
+                                            final long selfProposalNo, final AbstractBaseReqProto req,
                                             final boolean isSelf) {
         boolean checkProposalNo = isSelf ? req.getProposalNo() >= selfProposalNo : req.getProposalNo() > selfProposalNo;
         if (!paxosMemberConfiguration.isValid(req.getNodeId())
-                || req.getMemberConfigurationVersion() < paxosMemberConfiguration.getVersion()
-                || !checkProposalNo) {
+            || req.getMemberConfigurationVersion() < paxosMemberConfiguration.getVersion()
+            || !checkProposalNo) {
 
             LOG.info("checkPrepareReqValidity, req.version: {}, local.version: {}, req.proposalNo: {}, local.proposalNo: {}, checkProposalNo: {}",
-                    req.getMemberConfigurationVersion(), paxosMemberConfiguration.getVersion(), req.getProposalNo(), selfProposalNo, checkProposalNo);
+                req.getMemberConfigurationVersion(), paxosMemberConfiguration.getVersion(), req.getProposalNo(), selfProposalNo, checkProposalNo);
             return false;
         }
         if (!isSelf) {
@@ -194,11 +197,11 @@ public class AcceptorImpl implements Acceptor {
         return true;
     }
 
-    private boolean checkAcceptReqValidity(final PaxosMemberConfiguration paxosMemberConfiguration, final long selfProposalNo, final BaseReq req,
+    private boolean checkAcceptReqValidity(final PaxosMemberConfiguration paxosMemberConfiguration, final long selfProposalNo, final AbstractBaseReqProto req,
                                            final boolean isSelf) {
         if (!paxosMemberConfiguration.isValid(req.getNodeId())
-                || req.getMemberConfigurationVersion() < paxosMemberConfiguration.getVersion()
-                || req.getProposalNo() < selfProposalNo) {
+            || req.getMemberConfigurationVersion() < paxosMemberConfiguration.getVersion()
+            || req.getProposalNo() < selfProposalNo) {
             return false;
         }
         if (!isSelf) {

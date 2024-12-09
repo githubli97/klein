@@ -16,12 +16,26 @@
  */
 package com.ofcoder.klein.consensus.paxos.rpc.vo;
 
-import java.io.Serializable;
+import com.ofcoder.klein.consensus.facade.Command;
+import com.ofcoder.klein.consensus.facade.proto.CommandProto;
 
 /**
- * ChangeMemberRes.
- *
- * @author 释慧利
+ * proto command.
  */
-public class ChangeMemberRes implements Serializable {
+public class ProtoCommand implements Command {
+    private CommandProto proto;
+
+    public ProtoCommand(final CommandProto proto) {
+        this.proto = proto;
+    }
+
+    @Override
+    public String getGroup() {
+        return proto.getGroup();
+    }
+
+    @Override
+    public Object getData() {
+        return proto.getData();
+    }
 }

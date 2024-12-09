@@ -22,7 +22,7 @@ import com.ofcoder.klein.common.serialization.Hessian2Util;
 import com.ofcoder.klein.consensus.facade.AbstractRpcProcessor;
 import com.ofcoder.klein.consensus.paxos.PaxosNode;
 import com.ofcoder.klein.consensus.paxos.core.RuntimeAccessor;
-import com.ofcoder.klein.consensus.paxos.rpc.vo.PreElectReq;
+import com.ofcoder.klein.consensus.paxos.rpc.generated.PreElectReqProto;
 import com.ofcoder.klein.consensus.paxos.rpc.vo.PreElectRes;
 import com.ofcoder.klein.rpc.facade.RpcContext;
 
@@ -31,7 +31,7 @@ import com.ofcoder.klein.rpc.facade.RpcContext;
  *
  * @author 释慧利
  */
-public class PreElectProcessor extends AbstractRpcProcessor<PreElectReq> {
+public class PreElectProcessor extends AbstractRpcProcessor<PreElectReqProto> {
     private PaxosNode self;
 
     public PreElectProcessor(final PaxosNode self) {
@@ -39,7 +39,7 @@ public class PreElectProcessor extends AbstractRpcProcessor<PreElectReq> {
     }
 
     @Override
-    public void handleRequest(final PreElectReq request, final RpcContext context) {
+    public void handleRequest(final PreElectReqProto request, final RpcContext context) {
         context.response(
                 ByteBuffer.wrap(Hessian2Util.serialize(PreElectRes.Builder.aPreElectRes().master(
                         RuntimeAccessor.getMaster().getMaster().getMaster()
@@ -49,6 +49,6 @@ public class PreElectProcessor extends AbstractRpcProcessor<PreElectReq> {
 
     @Override
     public String service() {
-        return PreElectReq.class.getSimpleName();
+        return PreElectReqProto.class.getSimpleName();
     }
 }

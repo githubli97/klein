@@ -23,9 +23,10 @@ import com.ofcoder.klein.consensus.paxos.PaxosNode;
 import com.ofcoder.klein.consensus.paxos.Proposal;
 import com.ofcoder.klein.consensus.paxos.core.sm.MemberRegistry;
 import com.ofcoder.klein.consensus.paxos.core.sm.PaxosMemberConfiguration;
+import com.ofcoder.klein.consensus.paxos.rpc.generated.AbstractBaseReqProto;
 import com.ofcoder.klein.consensus.paxos.rpc.vo.LearnReq;
 import com.ofcoder.klein.consensus.paxos.rpc.vo.LearnRes;
-import com.ofcoder.klein.consensus.paxos.rpc.vo.SnapSyncReq;
+import com.ofcoder.klein.consensus.paxos.rpc.generated.SnapSyncReqProto;
 import com.ofcoder.klein.consensus.paxos.rpc.vo.SnapSyncRes;
 import com.ofcoder.klein.consensus.paxos.rpc.vo.Sync;
 import com.ofcoder.klein.rpc.facade.Endpoint;
@@ -167,12 +168,14 @@ public class DataAligner {
         boolean result = false;
         long checkpoint = -1;
         try {
-            SnapSyncReq req = SnapSyncReq.Builder.aSnapSyncReq()
-                    .nodeId(self.getSelf().getId())
-                    .proposalNo(self.getCurProposalNo())
-                    .memberConfigurationVersion(memberConfig.getVersion())
-                    .checkpoint(RuntimeAccessor.getLearner().getLastCheckpoint())
-                    .build();
+            SnapSyncReqProto req = SnapSyncReqProto.newBuilder()
+                .setAbstractBaseReq(AbstractBaseReqProto.newBuilder()
+                    .setNodeId(self.getSelf().getId())
+                    .setProposalNo(self.getCurProposalNo())
+                    .setMemberConfigurationVersion(memberConfig.getVersion())
+                    .build())
+                .setCheckpoint(RuntimeAccessor.getLearner().getLastCheckpoint())
+                .build();
             SnapSyncRes res = client.sendRequestSync(target, req, 1000);
 
             RuntimeAccessor.getLearner().loadSnapSync(res.getImages());

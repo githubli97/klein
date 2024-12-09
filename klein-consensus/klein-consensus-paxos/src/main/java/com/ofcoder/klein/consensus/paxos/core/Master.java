@@ -18,9 +18,9 @@ package com.ofcoder.klein.consensus.paxos.core;
 
 import com.ofcoder.klein.common.Role;
 import com.ofcoder.klein.consensus.facade.config.ConsensusProp;
-import com.ofcoder.klein.consensus.paxos.rpc.vo.NewMasterReq;
-import com.ofcoder.klein.consensus.paxos.rpc.vo.NewMasterRes;
-import com.ofcoder.klein.consensus.paxos.rpc.vo.Ping;
+import com.ofcoder.klein.consensus.paxos.rpc.generated.PingReqProto;
+import com.ofcoder.klein.consensus.paxos.rpc.generated.NewMasterReqProto;
+import com.ofcoder.klein.consensus.paxos.rpc.generated.NewMasterResProto;
 
 /**
  * Master Role.
@@ -60,7 +60,7 @@ public interface Master extends Role<ConsensusProp> {
      * @param isSelf  whether heartbeat come from themselves
      * @return whether accept the heartbeat
      */
-    boolean onReceiveHeartbeat(Ping request, boolean isSelf);
+    boolean onReceiveHeartbeat(PingReqProto request, boolean isSelf);
 
     /**
      * handle NewMaster request.
@@ -69,7 +69,7 @@ public interface Master extends Role<ConsensusProp> {
      * @param isSelf  from self
      * @return handle result
      */
-    NewMasterRes onReceiveNewMaster(NewMasterReq request, boolean isSelf);
+    NewMasterResProto onReceiveNewMaster(NewMasterReqProto request, boolean isSelf);
 
     enum ElectState {
         DISABLE(true),

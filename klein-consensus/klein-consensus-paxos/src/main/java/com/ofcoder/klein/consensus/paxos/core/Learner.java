@@ -20,11 +20,11 @@ import com.ofcoder.klein.common.Role;
 import com.ofcoder.klein.consensus.facade.config.ConsensusProp;
 import com.ofcoder.klein.consensus.facade.sm.SM;
 import com.ofcoder.klein.consensus.facade.sm.SMApplier;
-import com.ofcoder.klein.consensus.paxos.rpc.vo.ConfirmReq;
+import com.ofcoder.klein.consensus.paxos.rpc.generated.ConfirmReqProto;
 import com.ofcoder.klein.consensus.paxos.rpc.vo.LearnReq;
 import com.ofcoder.klein.consensus.paxos.rpc.vo.LearnRes;
-import com.ofcoder.klein.consensus.paxos.rpc.vo.NodeState;
-import com.ofcoder.klein.consensus.paxos.rpc.vo.SnapSyncReq;
+import com.ofcoder.klein.consensus.paxos.rpc.generated.NodeStateProto;
+import com.ofcoder.klein.consensus.paxos.rpc.generated.SnapSyncReqProto;
 import com.ofcoder.klein.consensus.paxos.rpc.vo.SnapSyncRes;
 import com.ofcoder.klein.storage.facade.Snap;
 import java.util.List;
@@ -82,7 +82,7 @@ public interface Learner extends Role<ConsensusProp> {
      *
      * @param state target information
      */
-    void alignData(NodeState state);
+    void alignData(NodeStateProto state);
 
     /**
      * Processing confirm message.
@@ -91,7 +91,7 @@ public interface Learner extends Role<ConsensusProp> {
      * @param req    message
      * @param isSelf from self
      */
-    void handleConfirmRequest(ConfirmReq req, boolean isSelf);
+    void handleConfirmRequest(ConfirmReqProto req, boolean isSelf);
 
     /**
      * Processing learn message.
@@ -108,6 +108,6 @@ public interface Learner extends Role<ConsensusProp> {
      * @param req message
      * @return handle result
      */
-    SnapSyncRes handleSnapSyncRequest(SnapSyncReq req);
+    SnapSyncRes handleSnapSyncRequest(SnapSyncReqProto req);
 
 }

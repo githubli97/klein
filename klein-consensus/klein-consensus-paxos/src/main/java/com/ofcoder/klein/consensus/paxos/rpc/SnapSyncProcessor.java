@@ -22,7 +22,7 @@ import com.ofcoder.klein.common.serialization.Hessian2Util;
 import com.ofcoder.klein.consensus.facade.AbstractRpcProcessor;
 import com.ofcoder.klein.consensus.paxos.PaxosNode;
 import com.ofcoder.klein.consensus.paxos.core.RuntimeAccessor;
-import com.ofcoder.klein.consensus.paxos.rpc.vo.SnapSyncReq;
+import com.ofcoder.klein.consensus.paxos.rpc.generated.SnapSyncReqProto;
 import com.ofcoder.klein.consensus.paxos.rpc.vo.SnapSyncRes;
 import com.ofcoder.klein.rpc.facade.RpcContext;
 
@@ -31,20 +31,20 @@ import com.ofcoder.klein.rpc.facade.RpcContext;
  *
  * @author 释慧利
  */
-public class SnapSyncProcessor extends AbstractRpcProcessor<SnapSyncReq> {
+public class SnapSyncProcessor extends AbstractRpcProcessor<SnapSyncReqProto> {
 
     public SnapSyncProcessor(final PaxosNode self) {
         // do nothing.
     }
 
     @Override
-    public void handleRequest(final SnapSyncReq request, final RpcContext context) {
+    public void handleRequest(final SnapSyncReqProto request, final RpcContext context) {
         SnapSyncRes snapSyncRes = RuntimeAccessor.getLearner().handleSnapSyncRequest(request);
         context.response(ByteBuffer.wrap(Hessian2Util.serialize(snapSyncRes)));
     }
 
     @Override
     public String service() {
-        return SnapSyncReq.class.getSimpleName();
+        return SnapSyncReqProto.class.getSimpleName();
     }
 }
