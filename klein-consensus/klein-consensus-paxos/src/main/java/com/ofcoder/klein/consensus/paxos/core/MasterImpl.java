@@ -16,11 +16,12 @@
  */
 package com.ofcoder.klein.consensus.paxos.core;
 
+import com.ofcoder.klein.serializer.hessian2.Hessian2Util;
 import com.ofcoder.klein.common.util.ThreadExecutor;
 import com.ofcoder.klein.common.util.TrueTime;
 import com.ofcoder.klein.common.util.timer.RepeatedTimer;
 import com.ofcoder.klein.consensus.facade.AbstractInvokeCallback;
-import com.ofcoder.klein.consensus.facade.Command;
+import com.ofcoder.klein.consensus.facade.NoopCommand;
 import com.ofcoder.klein.consensus.facade.config.ConsensusProp;
 import com.ofcoder.klein.consensus.facade.quorum.Quorum;
 import com.ofcoder.klein.consensus.facade.quorum.QuorumFactory;
@@ -208,7 +209,7 @@ public class MasterImpl implements Master {
             req.setNodeId(self.getSelf().getId());
 
             CountDownLatch latch = new CountDownLatch(1);
-            Proposal proposal = new Proposal(MasterSM.GROUP, req);
+            Proposal proposal = new Proposal(MasterSM.GROUP, Hessian2Util.serialize(req));
 
             RuntimeAccessor.getProposer().propose(proposal, (result, changed) -> {
                 if (result && !changed) {
@@ -272,7 +273,7 @@ public class MasterImpl implements Master {
             if (quorum.isGranted() == Quorum.GrantResult.PASS && next.compareAndSet(false, true)) {
                 restartSendHbNow();
 
-                RuntimeAccessor.getProposer().propose(Command.NOOP, (noopResult, dataChange) -> {
+                RuntimeAccessor.getProposer().propose(NoopCommand.NOOP, (noopResult, dataChange) -> {
                     if (noopResult) {
                         changeMaster(self.getSelf().getId());
                     } else {
