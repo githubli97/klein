@@ -16,14 +16,13 @@
  */
 package com.ofcoder.klein.rpc.facade;
 
-import java.io.Serializable;
+import com.google.protobuf.GeneratedMessageV3;
+import com.ofcoder.klein.serializer.Serializer;
+import com.ofcoder.klein.spi.ExtensionLoader;
+import com.ofcoder.klein.spi.SPI;
 import java.nio.ByteBuffer;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.ofcoder.klein.serializer.hessian2.Hessian2Util;
-import com.ofcoder.klein.spi.SPI;
 
 /**
  * grpc client for send request.
@@ -75,7 +74,18 @@ public interface RpcClient {
      * @param request  invoke data and service info
      * @param callback invoke callback
      */
-    default void sendRequestAsync(Endpoint target, Serializable request, InvokeCallback callback) {
+//    default void sendRequestAsync(Endpoint target, Serializable request, InvokeCallback callback) {
+//        sendRequestAsync(target, request, callback, requestTimeout());
+//    }
+
+    /**
+     * send request for async.
+     *
+     * @param target   target
+     * @param request  invoke data and service info
+     * @param callback invoke callback
+     */
+    default void sendRequestAsync(Endpoint target, GeneratedMessageV3 request, InvokeCallback callback) {
         sendRequestAsync(target, request, callback, requestTimeout());
     }
 
@@ -87,11 +97,30 @@ public interface RpcClient {
      * @param callback  invoke callback
      * @param timeoutMs invoke timeout
      */
-    default void sendRequestAsync(Endpoint target, Serializable request, InvokeCallback callback, long timeoutMs) {
+//    default void sendRequestAsync(Endpoint target, Serializable request, InvokeCallback callback, long timeoutMs) {
+//        Serializer hessian2 = ExtensionLoader.getExtensionLoader(Serializer.class).register("hessian2");
+//
+//        InvokeParam param = InvokeParam.Builder.anInvokeParam()
+//                .service(request.getClass().getSimpleName())
+//                .method(RpcProcessor.KLEIN)
+//                .data(ByteBuffer.wrap(hessian2.serialize(request))).build();
+//        sendRequestAsync(target, param, callback, timeoutMs);
+//    }
+
+    /**
+     * send request for async.
+     *
+     * @param target    target
+     * @param request   invoke data and service info
+     * @param callback  invoke callback
+     * @param timeoutMs invoke timeout
+     */
+    default void sendRequestAsync(Endpoint target, GeneratedMessageV3 request, InvokeCallback callback, long timeoutMs) {
+        Serializer protobuf = ExtensionLoader.getExtensionLoader(Serializer.class).register("protobuf");
         InvokeParam param = InvokeParam.Builder.anInvokeParam()
                 .service(request.getClass().getSimpleName())
                 .method(RpcProcessor.KLEIN)
-                .data(ByteBuffer.wrap(Hessian2Util.serialize(request))).build();
+                .data(ByteBuffer.wrap(protobuf.serialize(request))).build();
         sendRequestAsync(target, param, callback, timeoutMs);
     }
 
@@ -125,12 +154,32 @@ public interface RpcClient {
      * @param <R>       result type
      * @return invoke result
      */
-    default <R> R sendRequestSync(Endpoint target, Serializable request, long timeoutMs) {
+//    default <R> R sendRequestSync(Endpoint target, Serializable request, long timeoutMs) {
+//        Serializer hessian2 = ExtensionLoader.getExtensionLoader(Serializer.class).register("hessian2");
+//
+//        InvokeParam param = InvokeParam.Builder.anInvokeParam()
+//                .service(request.getClass().getSimpleName())
+//                .method(RpcProcessor.KLEIN)
+//                .data(ByteBuffer.wrap(hessian2.serialize(request))).build();
+//        return sendRequestSync(target, param, timeoutMs);
+//    }
+
+    /**
+     * send request for sync.
+     *
+     * @param target    target
+     * @param request   invoke data and service info
+     * @param timeoutMs invoke timeout
+     * @param <R>       result type
+     * @return invoke result
+     */
+    default <R> R sendRequestSync(Endpoint target, GeneratedMessageV3 request, long timeoutMs) {
+        Serializer protobuf = ExtensionLoader.getExtensionLoader(Serializer.class).register("protobuf");
 
         InvokeParam param = InvokeParam.Builder.anInvokeParam()
                 .service(request.getClass().getSimpleName())
                 .method(RpcProcessor.KLEIN)
-                .data(ByteBuffer.wrap(Hessian2Util.serialize(request))).build();
+                .data(ByteBuffer.wrap(protobuf.serialize(request))).build();
         return sendRequestSync(target, param, timeoutMs);
     }
 
@@ -142,7 +191,19 @@ public interface RpcClient {
      * @param <R>     result type
      * @return invoke result
      */
-    default <R> R sendRequestSync(Endpoint target, Serializable request) {
+//    default <R> R sendRequestSync(Endpoint target, Serializable request) {
+//        return sendRequestSync(target, request, requestTimeout());
+//    }
+
+    /**
+     * send request for sync.
+     *
+     * @param target  target
+     * @param request invoke data and service info
+     * @param <R>     result type
+     * @return invoke result
+     */
+    default <R> R sendRequestSync(Endpoint target, GeneratedMessageV3 request) {
         return sendRequestSync(target, request, requestTimeout());
     }
 

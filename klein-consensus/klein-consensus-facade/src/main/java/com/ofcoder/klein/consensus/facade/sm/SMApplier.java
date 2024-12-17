@@ -32,7 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ofcoder.klein.common.util.KleinThreadFactory;
-import com.ofcoder.klein.consensus.facade.Command;
+import com.ofcoder.klein.storage.facade.Command;
 import com.ofcoder.klein.consensus.facade.config.ConsensusProp;
 import com.ofcoder.klein.consensus.facade.config.SnapshotStrategy;
 import com.ofcoder.klein.spi.ExtensionLoader;
@@ -130,7 +130,7 @@ public class SMApplier {
         Map<Command, Object> applyResult = new HashMap<>();
         if (instanceId > lastApplyId) {
             LOG.debug("doing apply instance[{}]", instanceId);
-            Instance<Command> instance = logManager.getInstance(instanceId);
+            Instance instance = logManager.getInstance(instanceId);
             List<Command> proposals = instance.getGrantedValue().stream()
                     .filter(Command::ifNoop)
                     .filter(it -> group.equals(it.getGroup()))

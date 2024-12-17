@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ofcoder.klein.consensus.facade.Command;
+import com.ofcoder.klein.storage.facade.Command;
 import com.ofcoder.klein.consensus.facade.Result;
 import com.ofcoder.klein.consensus.facade.config.ConsensusProp;
 import com.ofcoder.klein.consensus.facade.exception.ConsensusException;

@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package com.ofcoder.klein.consensus.paxos;
+import "command.proto";
+
+option java_multiple_files = true;
+option java_package = "com.ofcoder.klein.consensus.paxos.rpc.generated";
+option java_outer_classname = "LearnRes";
+
+message LearnResProto
+{
+    string nodeId = 1;
+    string result = 2;
+    int64 instanceId = 3;
+    int64 proposalNo = 4;
+    string checksum = 5;
+    string state = 6;
+    CommandProto data = 7;
+};

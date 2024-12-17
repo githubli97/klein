@@ -16,17 +16,17 @@
  */
 package com.ofcoder.klein.consensus.facade;
 
-import java.nio.ByteBuffer;
-
-import com.ofcoder.klein.serializer.hessian2.Hessian2Util;
+import com.google.protobuf.GeneratedMessageV3;
 import com.ofcoder.klein.rpc.facade.InvokeCallback;
+import com.ofcoder.klein.serializer.protobuf.ProtobufUtil;
+import java.nio.ByteBuffer;
 
 /**
  * Invoke callback.
  *
  * @author far.liu
  */
-public abstract class AbstractInvokeCallback<RES> implements InvokeCallback {
+public abstract class AbstractInvokeCallback<RES extends GeneratedMessageV3> implements InvokeCallback {
     /**
      * invoke completed.
      *
@@ -36,7 +36,7 @@ public abstract class AbstractInvokeCallback<RES> implements InvokeCallback {
 
     @Override
     public void complete(final ByteBuffer result) {
-        RES deserialize = Hessian2Util.deserialize(result.array());
+        RES deserialize = ProtobufUtil.deserialize(result.array());
         complete(deserialize);
     }
 }

@@ -16,7 +16,7 @@
  */
 package com.ofcoder.klein.consensus.paxos;
 
-import com.ofcoder.klein.consensus.facade.Command;
+import com.ofcoder.klein.storage.facade.Command;
 import java.util.Arrays;
 import java.util.Objects;
 

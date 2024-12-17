@@ -9,8 +9,8 @@
         <version>0.0.8</version>
     </parent>
 
-    <artifactId>klein-serializer-protobuf</artifactId>
     <groupId>com.ofcoder.klein.serializer.protobuf</groupId>
+    <artifactId>klein-serializer-protobuf</artifactId>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
@@ -18,4 +18,36 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.ofcoder.klein.serializer.facade</groupId>
+            <artifactId>klein-serializer-facade</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.xolstice.maven.plugins</groupId>
+                <artifactId>protobuf-maven-plugin</artifactId>
+                <configuration>
+                    <protoSourceRoot>${project.basedir}/src/test/resources/protobuf/com/ofcoder/klein/serializer/protobuf/</protoSourceRoot>
+                    <protocArtifact>
+                        com.google.protobuf:protoc:3.11.0:exe:${os.detected.classifier}
+                    </protocArtifact>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

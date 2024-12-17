@@ -29,8 +29,8 @@
             <artifactId>klein-storage-facade</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.ofcoder.klein.serializer.hessian2</groupId>
-            <artifactId>klein-serializer-hessian2</artifactId>
+            <groupId>com.ofcoder.klein.serializer.protobuf</groupId>
+            <artifactId>klein-serializer-protobuf</artifactId>
         </dependency>
     </dependencies>
 

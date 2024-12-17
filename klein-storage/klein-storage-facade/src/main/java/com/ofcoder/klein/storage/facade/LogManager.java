@@ -46,7 +46,7 @@ public interface LogManager<P extends Serializable> {
      *
      * @param instance data
      */
-    void updateInstance(Instance<P> instance);
+    void updateInstance(Instance instance);
 
     /**
      * Get the instance by id.
@@ -54,14 +54,14 @@ public interface LogManager<P extends Serializable> {
      * @param id the index of instance
      * @return the instance with {@code id}
      */
-    Instance<P> getInstance(long id);
+    Instance getInstance(long id);
 
     /**
      * Get instance without consensus.
      *
      * @return all instance for no confirm, state in (PREPARED, ACCEPTED)
      */
-    List<Instance<P>> getInstanceNoConfirm();
+    List<Instance> getInstanceNoConfirm();
 
 
     /**
@@ -69,7 +69,7 @@ public interface LogManager<P extends Serializable> {
      *
      * @return range in [checkpoint, Max Instance] confirmed the Instance
      */
-    List<Instance<P>> getInstanceConfirmed();
+    List<Instance> getInstanceConfirmed();
 
     /**
      * load MetaData.

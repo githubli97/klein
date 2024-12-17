@@ -16,18 +16,18 @@
  */
 package com.ofcoder.klein.consensus.facade;
 
-import java.nio.ByteBuffer;
-
+import com.google.protobuf.GeneratedMessageV3;
 import com.ofcoder.klein.rpc.facade.RpcContext;
 import com.ofcoder.klein.rpc.facade.RpcProcessor;
-import com.ofcoder.klein.serializer.hessian2.Hessian2Util;
+import com.ofcoder.klein.serializer.protobuf.ProtobufUtil;
+import java.nio.ByteBuffer;
 
 /**
  * rpc processor.
  *
  * @author 释慧利
  */
-public abstract class AbstractRpcProcessor<R> implements RpcProcessor {
+public abstract class AbstractRpcProcessor<R extends GeneratedMessageV3> implements RpcProcessor {
 
     /**
      * handle request.
@@ -39,8 +39,7 @@ public abstract class AbstractRpcProcessor<R> implements RpcProcessor {
 
     @Override
     public void handleRequest(final ByteBuffer request, final RpcContext context) {
-        // todo
-        R deserialize = Hessian2Util.deserialize(request.array());
+        R deserialize = ProtobufUtil.deserialize(request.array());
         handleRequest(deserialize, context);
     }
 }

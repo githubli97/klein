@@ -14,7 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.ofcoder.klein.common.exception;
+package com.ofcoder.klein.serializer;
+
+import com.ofcoder.klein.common.exception.KleinException;
 
 /**
  * Serialization Exception.

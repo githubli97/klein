@@ -16,25 +16,8 @@
  */
 package com.ofcoder.klein.storage.file;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.stream.Collectors;
-
-import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.ofcoder.klein.serializer.hessian2.Hessian2Util;
 import com.ofcoder.klein.common.util.StreamUtil;
+import com.ofcoder.klein.serializer.hessian2.Hessian2Util;
 import com.ofcoder.klein.spi.Join;
 import com.ofcoder.klein.storage.facade.Instance;
 import com.ofcoder.klein.storage.facade.LogManager;
@@ -42,6 +25,20 @@ import com.ofcoder.klein.storage.facade.Snap;
 import com.ofcoder.klein.storage.facade.config.StorageProp;
 import com.ofcoder.klein.storage.facade.exception.LockException;
 import com.ofcoder.klein.storage.facade.exception.StorageException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.stream.Collectors;
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Jvm LogManager.
@@ -49,14 +46,14 @@ import com.ofcoder.klein.storage.facade.exception.StorageException;
  * @author 释慧利
  */
 @Join
-public class FileLogManager<P extends Serializable> implements LogManager<P> {
+public class FileLogManager implements LogManager {
     private static final Logger LOG = LoggerFactory.getLogger(FileLogManager.class);
 
     private static String selfPath;
     private static String metaPath;
 
-    private ConcurrentMap<Long, Instance<P>> runningInstances;
-    private ConcurrentMap<Long, Instance<P>> confirmedInstances;
+    private ConcurrentMap<Long, Instance> runningInstances;
+    private ConcurrentMap<Long, Instance> confirmedInstances;
     private ConcurrentMap<Long, ReentrantReadWriteLock> locks = new ConcurrentHashMap<>();
 
     private MetaData metadata;
@@ -89,7 +86,7 @@ public class FileLogManager<P extends Serializable> implements LogManager<P> {
     }
 
     @Override
-    public Instance<P> getInstance(final long id) {
+    public Instance getInstance(final long id) {
         if (runningInstances.containsKey(id)) {
             return runningInstances.get(id);
         }
@@ -100,17 +97,17 @@ public class FileLogManager<P extends Serializable> implements LogManager<P> {
     }
 
     @Override
-    public List<Instance<P>> getInstanceNoConfirm() {
+    public List<Instance> getInstanceNoConfirm() {
         return new ArrayList<>(runningInstances.values());
     }
 
     @Override
-    public List<Instance<P>> getInstanceConfirmed() {
+    public List<Instance> getInstanceConfirmed() {
         return new ArrayList<>(confirmedInstances.values());
     }
 
     @Override
-    public void updateInstance(final Instance<P> instance) {
+    public void updateInstance(final Instance instance) {
         ReentrantReadWriteLock lock = locks.get(instance.getInstanceId());
         if (lock == null || !lock.isWriteLockedByCurrentThread()) {
             throw new LockException("before calling this method: updateInstance, you need to obtain the lock");

@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.google.common.collect.ImmutableList;
 import com.ofcoder.klein.common.Holder;
-import com.ofcoder.klein.consensus.facade.Command;
+import com.ofcoder.klein.storage.facade.Command;
 import com.ofcoder.klein.consensus.facade.quorum.Quorum;
 import com.ofcoder.klein.consensus.facade.quorum.QuorumFactory;
 import com.ofcoder.klein.consensus.paxos.core.sm.PaxosMemberConfiguration;

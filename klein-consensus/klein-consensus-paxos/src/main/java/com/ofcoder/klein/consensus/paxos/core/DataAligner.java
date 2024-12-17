@@ -14,19 +14,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.ofcoder.klein.consensus.paxos.core;
 
 import com.ofcoder.klein.common.util.KleinThreadFactory;
 import com.ofcoder.klein.consensus.facade.AbstractInvokeCallback;
+import com.ofcoder.klein.storage.facade.Command;
 import com.ofcoder.klein.consensus.facade.config.ConsensusProp;
 import com.ofcoder.klein.consensus.paxos.PaxosNode;
 import com.ofcoder.klein.consensus.paxos.Proposal;
 import com.ofcoder.klein.consensus.paxos.core.sm.MemberRegistry;
 import com.ofcoder.klein.consensus.paxos.core.sm.PaxosMemberConfiguration;
 import com.ofcoder.klein.consensus.paxos.rpc.generated.AbstractBaseReqProto;
-import com.ofcoder.klein.consensus.paxos.rpc.vo.LearnReq;
-import com.ofcoder.klein.consensus.paxos.rpc.vo.LearnRes;
+import com.ofcoder.klein.consensus.paxos.rpc.generated.LearnReqProto;
 import com.ofcoder.klein.consensus.paxos.rpc.generated.SnapSyncReqProto;
+import com.ofcoder.klein.consensus.paxos.rpc.generated.LearnResProto;
 import com.ofcoder.klein.consensus.paxos.rpc.vo.SnapSyncRes;
 import com.ofcoder.klein.consensus.paxos.rpc.vo.Sync;
 import com.ofcoder.klein.rpc.facade.Endpoint;
@@ -35,15 +37,15 @@ import com.ofcoder.klein.spi.ExtensionLoader;
 import com.ofcoder.klein.storage.facade.Instance;
 import com.ofcoder.klein.storage.facade.LogManager;
 import com.ofcoder.klein.storage.facade.Snap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Comparator;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.function.Predicate;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DataAligner {
     private static final Logger LOG = LoggerFactory.getLogger(DataAligner.class);
@@ -122,8 +124,11 @@ public class DataAligner {
         }
 
         LOG.info("start learn instanceId[{}] from node-{}", instanceId, target.getId());
-        LearnReq req = LearnReq.Builder.aLearnReq().instanceId(instanceId).nodeId(self.getSelf().getId()).build();
-        client.sendRequestAsync(target, req, new AbstractInvokeCallback<LearnRes>() {
+        LearnReqProto req = LearnReqProto.newBuilder()
+            .setInstanceId(instanceId)
+            .setNodeId(self.getSelf().getId())
+            .build();
+        client.sendRequestAsync(target, req, new AbstractInvokeCallback<LearnResProto>() {
             @Override
             public void error(final Throwable err) {
                 LOG.error("learned instance[{}] from node-{}, {}", instanceId, target.getId(), err.getMessage());
@@ -131,19 +136,19 @@ public class DataAligner {
             }
 
             @Override
-            public void complete(final LearnRes result) {
-                if (result.isResult() == Sync.SNAP) {
+            public void complete(final LearnResProto result) {
+                if (StringUtils.equals(result.getResult(), Sync.SNAP.name())) {
                     LOG.info("learned instance[{}] from node-{}, sync.type: SNAP", instanceId, target.getId());
                     learnQueue.offer(new Task(Task.HIGH_PRIORITY, TaskEnum.SNAP, target, callback));
 
-                } else if (result.isResult() == Sync.SINGLE) {
+                } else if (StringUtils.equals(result.getResult(), Sync.SINGLE.name())) {
                     LOG.info("learned instance[{}] from node-{}, sync.type: SINGLE", instanceId, target.getId());
-                    Instance<Proposal> update = Instance.Builder.<Proposal>anInstance()
-                            .instanceId(instanceId)
-                            .proposalNo(result.getInstance().getProposalNo())
-                            .grantedValue(result.getInstance().getGrantedValue())
-                            .state(result.getInstance().getState())
-                            .build();
+                    Instance<Command> update = Instance.Builder.<Proposal>anInstance()
+                        .instanceId(instanceId)
+                        .proposalNo(result.getProposalNo())
+                        .grantedValue(result.getData())
+                        .state(result.getState())
+                        .build();
 
                     try {
                         logManager.getLock(instanceId).writeLock().lock();

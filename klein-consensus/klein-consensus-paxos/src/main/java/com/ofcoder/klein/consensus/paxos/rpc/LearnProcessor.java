@@ -16,6 +16,7 @@
  */
 package com.ofcoder.klein.consensus.paxos.rpc;
 
+import com.ofcoder.klein.consensus.paxos.rpc.generated.LearnReqProto;
 import java.nio.ByteBuffer;
 
 import org.slf4j.Logger;
@@ -25,8 +26,7 @@ import com.ofcoder.klein.serializer.hessian2.Hessian2Util;
 import com.ofcoder.klein.consensus.facade.AbstractRpcProcessor;
 import com.ofcoder.klein.consensus.paxos.PaxosNode;
 import com.ofcoder.klein.consensus.paxos.core.RuntimeAccessor;
-import com.ofcoder.klein.consensus.paxos.rpc.vo.LearnReq;
-import com.ofcoder.klein.consensus.paxos.rpc.vo.LearnRes;
+import com.ofcoder.klein.consensus.paxos.rpc.generated.LearnResProto;
 import com.ofcoder.klein.rpc.facade.RpcContext;
 
 /**
@@ -34,7 +34,7 @@ import com.ofcoder.klein.rpc.facade.RpcContext;
  *
  * @author 释慧利
  */
-public class LearnProcessor extends AbstractRpcProcessor<LearnReq> {
+public class LearnProcessor extends AbstractRpcProcessor<LearnReqProto> {
     private static final Logger LOG = LoggerFactory.getLogger(LearnProcessor.class);
 
     public LearnProcessor(final PaxosNode self) {
@@ -43,12 +43,12 @@ public class LearnProcessor extends AbstractRpcProcessor<LearnReq> {
 
     @Override
     public String service() {
-        return LearnReq.class.getSimpleName();
+        return LearnReqProto.class.getSimpleName();
     }
 
     @Override
-    public void handleRequest(final LearnReq request, final RpcContext context) {
-        LearnRes res = RuntimeAccessor.getLearner().handleLearnRequest(request);
+    public void handleRequest(final LearnReqProto request, final RpcContext context) {
+        LearnResProto res = RuntimeAccessor.getLearner().handleLearnRequest(request);
         context.response(ByteBuffer.wrap(Hessian2Util.serialize(res)));
     }
 

@@ -16,8 +16,6 @@
  */
 package com.ofcoder.klein.serializer.hessian2;
 
-import com.ofcoder.klein.serializer.Serializer;
-
 /**
  * Hessian util.
  *
@@ -25,7 +23,7 @@ import com.ofcoder.klein.serializer.Serializer;
  */
 public class Hessian2Util {
 
-    private static final Serializer HESSIAN2 = new Hessian2Serializer();
+    private static final Hessian2Serializer HESSIAN2 = new Hessian2Serializer();
 
     /**
      * serialize object.

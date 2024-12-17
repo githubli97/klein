@@ -16,6 +16,8 @@
  */
 package com.ofcoder.klein.consensus.facade;
 
+import com.ofcoder.klein.storage.facade.Command;
+
 /**
  * noop command.
  */

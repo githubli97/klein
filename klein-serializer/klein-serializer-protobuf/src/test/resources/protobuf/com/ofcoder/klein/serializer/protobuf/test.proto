@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package com.ofcoder.klein.serializer.protobuf;
+
+option java_multiple_files = true;
+option java_package = "com.ofcoder.klein.serializer.protobuf.generated";
+option java_outer_classname = "Test";
+
+message TestProto
+{
+    string a = 1;
+    int64 b = 2;
+    int32 c = 3;
+    bool d = 4;
+};

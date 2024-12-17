@@ -16,19 +16,17 @@
  */
 package com.ofcoder.klein.consensus.paxos.rpc;
 
-import java.nio.ByteBuffer;
-import java.util.HashMap;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.ofcoder.klein.serializer.hessian2.Hessian2Util;
+import com.google.protobuf.Any;
 import com.ofcoder.klein.consensus.facade.AbstractRpcProcessor;
 import com.ofcoder.klein.consensus.paxos.PaxosNode;
 import com.ofcoder.klein.consensus.paxos.core.RuntimeAccessor;
 import com.ofcoder.klein.consensus.paxos.core.sm.MemberRegistry;
 import com.ofcoder.klein.consensus.paxos.rpc.generated.ConfirmReqProto;
 import com.ofcoder.klein.rpc.facade.RpcContext;
+import com.ofcoder.klein.serializer.protobuf.ProtobufUtil;
+import java.nio.ByteBuffer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Confirm Request Processor.
@@ -55,7 +53,7 @@ public class ConfirmProcessor extends AbstractRpcProcessor<ConfirmReqProto> {
             return;
         }
         RuntimeAccessor.getLearner().handleConfirmRequest(request, false);
-        context.response(ByteBuffer.wrap(Hessian2Util.serialize(new HashMap<>())));
+        context.response(ByteBuffer.wrap(ProtobufUtil.serialize(Any.newBuilder().build())));
     }
 
 }

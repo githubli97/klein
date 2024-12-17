@@ -16,7 +16,8 @@
  */
 package com.ofcoder.klein.consensus.paxos.core;
 
-import java.io.Serializable;
+import com.google.protobuf.GeneratedMessageV3;
+import com.ofcoder.klein.consensus.paxos.rpc.generated.LearnReqProto;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,7 +38,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.ofcoder.klein.consensus.facade.AbstractInvokeCallback;
-import com.ofcoder.klein.consensus.facade.Command;
+import com.ofcoder.klein.storage.facade.Command;
 import com.ofcoder.klein.consensus.facade.config.ConsensusProp;
 import com.ofcoder.klein.consensus.facade.sm.SM;
 import com.ofcoder.klein.consensus.facade.sm.SMApplier;
@@ -46,8 +47,7 @@ import com.ofcoder.klein.consensus.paxos.Proposal;
 import com.ofcoder.klein.consensus.paxos.core.sm.MemberRegistry;
 import com.ofcoder.klein.consensus.paxos.core.sm.PaxosMemberConfiguration;
 import com.ofcoder.klein.consensus.paxos.rpc.generated.ConfirmReqProto;
-import com.ofcoder.klein.consensus.paxos.rpc.vo.LearnReq;
-import com.ofcoder.klein.consensus.paxos.rpc.vo.LearnRes;
+import com.ofcoder.klein.consensus.paxos.rpc.generated.LearnResProto;
 import com.ofcoder.klein.consensus.paxos.rpc.generated.NodeStateProto;
 import com.ofcoder.klein.consensus.paxos.rpc.generated.SnapSyncReqProto;
 import com.ofcoder.klein.consensus.paxos.rpc.vo.SnapSyncRes;
@@ -247,7 +247,7 @@ public class LearnerImpl implements Learner {
 
         // for other members
         configuration.getMembersWithout(self.getSelf().getId())
-                .forEach(it -> client.sendRequestAsync(it, req, new AbstractInvokeCallback<Serializable>() {
+                .forEach(it -> client.sendRequestAsync(it, req, new AbstractInvokeCallback<GeneratedMessageV3>() {
                     @Override
                     public void error(final Throwable err) {
                         LOG.error("send confirm msg to node-{}, instance[{}], {}", it.getId(), instanceId, err.getMessage());
@@ -255,7 +255,7 @@ public class LearnerImpl implements Learner {
                     }
 
                     @Override
-                    public void complete(final Serializable result) {
+                    public void complete(final GeneratedMessageV3 result) {
                         // do nothing
                     }
                 }));
@@ -440,9 +440,9 @@ public class LearnerImpl implements Learner {
     }
 
     @Override
-    public LearnRes handleLearnRequest(final LearnReq request) {
+    public LearnResProto handleLearnRequest(final LearnReqProto request) {
         LOG.info("received a learn message from node[{}] about instance[{}]", request.getNodeId(), request.getInstanceId());
-        LearnRes.Builder res = LearnRes.Builder.aLearnRes().nodeId(self.getSelf().getId());
+        LearnResProto.Builder res = LearnResProto.Builder.aLearnRes().nodeId(self.getSelf().getId());
 
         if (request.getInstanceId() <= RuntimeAccessor.getLearner().getLastCheckpoint()) {
             return res.result(Sync.SNAP).build();

@@ -16,8 +16,8 @@
  */
 package com.ofcoder.klein.consensus.paxos.rpc.vo;
 
-import com.ofcoder.klein.consensus.facade.Command;
-import com.ofcoder.klein.consensus.facade.proto.CommandProto;
+import com.ofcoder.klein.storage.facade.Command;
+import com.ofcoder.klein.consensus.paxos.rpc.generated.CommandProto;
 
 /**
  * proto command.
@@ -30,12 +30,17 @@ public class ProtoCommand implements Command {
     }
 
     @Override
+    public boolean ifNoop() {
+        return proto.getIfNoop();
+    }
+
+    @Override
     public String getGroup() {
         return proto.getGroup();
     }
 
     @Override
-    public Object getData() {
-        return proto.getData();
+    public byte[] getData() {
+        return proto.getData().toByteArray();
     }
 }

@@ -25,8 +25,8 @@
             <artifactId>klein-consensus-facade</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.ofcoder.klein.serializer.hessian2</groupId>
-            <artifactId>klein-serializer-hessian2</artifactId>
+            <groupId>com.ofcoder.klein.serializer.protobuf</groupId>
+            <artifactId>klein-serializer-protobuf</artifactId>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>

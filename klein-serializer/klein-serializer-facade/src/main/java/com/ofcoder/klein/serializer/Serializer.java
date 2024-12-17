@@ -39,6 +39,7 @@ public interface Serializer<T> {
      *
      * @param bytes the bytes
      * @return the t
+     * @exception SerializationException 反序列化异常
      */
-    T deserialize(byte[] bytes);
+    T deserialize(byte[] bytes) throws SerializationException;
 }

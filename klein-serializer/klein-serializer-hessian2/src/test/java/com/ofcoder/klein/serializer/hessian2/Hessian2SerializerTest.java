@@ -6,9 +6,9 @@ import org.junit.Assert;
 
 import junit.framework.TestCase;
 
-public class Hessian2UtilTest extends TestCase {
+public class Hessian2SerializerTest extends TestCase {
 
-    public void testSerialize() {
+    public void testSerialize() throws Exception {
         Serializer hessian2 = ExtensionLoader.getExtensionLoader(Serializer.class).register("hessian2");
 
         String resource = "Hello Klein";

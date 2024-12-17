@@ -5,10 +5,11 @@ package com.ofcoder.klein.consensus.paxos;
 import "google/protobuf/any.proto";
 
 option java_multiple_files = true;
-option java_package = "com.ofcoder.klein.consensus.facade.proto";
+option java_package = "com.ofcoder.klein.consensus.paxos.rpc.generated";
 option java_outer_classname = "Command";
 
 message CommandProto {
-    string group = 1;
-    google.protobuf.Any data = 2;
+    bool ifNoop = 1;
+    string group = 2;
+    google.protobuf.Any data = 3;
 } 

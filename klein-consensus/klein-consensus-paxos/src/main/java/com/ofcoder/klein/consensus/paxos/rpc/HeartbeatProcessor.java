@@ -41,7 +41,7 @@ public class HeartbeatProcessor extends AbstractRpcProcessor<PingReqProto> {
     @Override
     public void handleRequest(final PingReqProto request, final RpcContext context) {
         if (RuntimeAccessor.getMaster().onReceiveHeartbeat(request, false)) {
-            context.response(ByteBuffer.wrap(Hessian2Util.serialize(new PongResProto())));
+            context.response(ByteBuffer.wrap(Hessian2Util.serialize(PongResProto.newBuilder().build())));
         }
     }
 

@@ -14,27 +14,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.ofcoder.klein.consensus.facade;
+package com.ofcoder.klein.serializer.protobuf;
 
-import java.io.Serializable;
+import com.google.protobuf.GeneratedMessageV3;
 
 /**
- * consensus content.
+ * Protobuf util.
+ *
+ * @author hang.li
  */
-public interface Command extends Serializable {
-    /**
-     * if noop command.
-     *
-     * @return noop command
-     */
-    boolean ifNoop();
+public class ProtobufUtil {
 
-    String getGroup();
+    private static final ProtobufSerializer PROTOBUF_SERIALIZER = new ProtobufSerializer();
 
     /**
-     * client's input data.
+     * serialize object.
      *
-     * @return data
+     * @param javaBean object
+     * @return serialized data
      */
-    byte[] getData();
+    public static byte[] serialize(final GeneratedMessageV3 javaBean) {
+        return PROTOBUF_SERIALIZER.serialize(javaBean);
+    }
+
+    /**
+     * deserialize data to java object.
+     *
+     * @param serializeData serialized data
+     * @param <T>           java object type
+     * @return java object
+     */
+    @SuppressWarnings("unchecked")
+    public static <T extends GeneratedMessageV3> T deserialize(final byte[] serializeData) {
+        return (T) PROTOBUF_SERIALIZER.deserialize(serializeData);
+    }
 }

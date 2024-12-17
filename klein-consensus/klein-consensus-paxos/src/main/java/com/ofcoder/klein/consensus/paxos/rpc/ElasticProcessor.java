@@ -17,6 +17,9 @@
 package com.ofcoder.klein.consensus.paxos.rpc;
 
 import com.ofcoder.klein.consensus.paxos.Constant;
+import com.ofcoder.klein.consensus.paxos.rpc.generated.ElasticResProto;
+import com.ofcoder.klein.consensus.paxos.rpc.generated.EndpointProto;
+import com.ofcoder.klein.rpc.facade.Endpoint;
 import java.nio.ByteBuffer;
 
 import org.slf4j.Logger;
@@ -53,17 +56,18 @@ public class ElasticProcessor extends AbstractRpcProcessor<ElasticReqProto> {
 
     @Override
     public void handleRequest(final ElasticReqProto request, final RpcContext context) {
-
+        EndpointProto endpointProto = request.getEndpoint();
+        Endpoint endpoint = new Endpoint(endpointProto.getId(), endpointProto.getIp(), endpointProto.getPort(), endpointProto.getOutsider());
         switch (request.getOp()) {
             case Constant.ELASTIC_REQ_OP_LAUNCH:
-                if (!MemberRegistry.getInstance().getMemberConfiguration().isValid(request.getEndpoint().getId())) {
-                    cluster.changeMember(Lists.newArrayList(request.getEndpoint()), Lists.newArrayList());
+                if (!MemberRegistry.getInstance().getMemberConfiguration().isValid(endpointProto.getId())) {
+                    cluster.changeMember(Lists.newArrayList(endpoint), Lists.newArrayList());
                 }
                 // else: i'm already in the member list.
                 break;
             case Constant.ELASTIC_REQ_OP_SHUTDOWN:
-                if (MemberRegistry.getInstance().getMemberConfiguration().isValid(request.getEndpoint().getId())) {
-                    cluster.changeMember(Lists.newArrayList(), Lists.newArrayList(request.getEndpoint()));
+                if (MemberRegistry.getInstance().getMemberConfiguration().isValid(endpointProto.getId())) {
+                    cluster.changeMember(Lists.newArrayList(), Lists.newArrayList(endpoint));
                 }
                 // else: i'm not in the member list.
                 break;
@@ -72,10 +76,10 @@ public class ElasticProcessor extends AbstractRpcProcessor<ElasticReqProto> {
                 break;
         }
 
-        ElasticRes res = new ElasticRes();
-        res.setResult(true);
+        ElasticResProto res = ElasticResProto.newBuilder()
+            .setResult(true)
+            .build();
         context.response(ByteBuffer.wrap(Hessian2Util.serialize(res)));
-
     }
 
 }

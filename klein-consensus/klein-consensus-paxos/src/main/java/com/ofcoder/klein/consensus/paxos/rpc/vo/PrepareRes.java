@@ -19,7 +19,7 @@ package com.ofcoder.klein.consensus.paxos.rpc.vo;
 import java.io.Serializable;
 import java.util.List;
 
-import com.ofcoder.klein.consensus.facade.Command;
+import com.ofcoder.klein.storage.facade.Command;
 import com.ofcoder.klein.storage.facade.Instance;
 
 /**

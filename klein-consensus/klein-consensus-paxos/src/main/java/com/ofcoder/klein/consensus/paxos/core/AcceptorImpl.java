@@ -17,7 +17,7 @@
 
 package com.ofcoder.klein.consensus.paxos.core;
 
-import com.ofcoder.klein.consensus.facade.Command;
+import com.ofcoder.klein.storage.facade.Command;
 import com.ofcoder.klein.consensus.facade.config.ConsensusProp;
 import com.ofcoder.klein.consensus.paxos.PaxosNode;
 import com.ofcoder.klein.consensus.paxos.core.sm.MemberRegistry;
@@ -135,7 +135,9 @@ public class AcceptorImpl implements Acceptor {
                 } else {
                     localInstance.setState(Instance.State.ACCEPTED);
                     localInstance.setProposalNo(req.getAbstractBaseReq().getProposalNo());
-                    localInstance.setGrantedValue(req.getDataList().stream().map(ProtoCommand::new).collect(Collectors.toList()));
+                    localInstance.setGrantedValue(req.getDataList().stream()
+                        .map(ProtoCommand::new)
+                        .collect(Collectors.toList()));
                     localInstance.setChecksum(req.getChecksum());
                     logManager.updateInstance(localInstance);
 

@@ -24,11 +24,11 @@ import java.util.List;
  *
  * @author 释慧利
  */
-public class Instance<D extends Serializable> implements Serializable {
+public class Instance implements Serializable {
 
     private long instanceId;
     private long proposalNo;
-    private List<D> grantedValue;
+    private List<Command> grantedValue;
     private String checksum;
     private State state = State.PREPARED;
 
@@ -73,7 +73,7 @@ public class Instance<D extends Serializable> implements Serializable {
      *
      * @return granted value
      */
-    public List<D> getGrantedValue() {
+    public List<Command> getGrantedValue() {
         return grantedValue;
     }
 
@@ -82,7 +82,7 @@ public class Instance<D extends Serializable> implements Serializable {
      *
      * @param grantedValue granted value
      */
-    public void setGrantedValue(final List<D> grantedValue) {
+    public void setGrantedValue(final List<Command> grantedValue) {
         this.grantedValue = grantedValue;
     }
 
@@ -116,10 +116,10 @@ public class Instance<D extends Serializable> implements Serializable {
         PREPARED, ACCEPTED, CONFIRMED;
     }
 
-    public static final class Builder<B extends Serializable> {
+    public static final class Builder {
         private long instanceId;
         private long proposalNo;
-        private List<B> grantedValue;
+        private List<Command> grantedValue;
         private String checksum;
         private State state;
 
@@ -132,8 +132,8 @@ public class Instance<D extends Serializable> implements Serializable {
          * @param <B> Instance data type
          * @return Builder
          */
-        public static <B extends Serializable> Builder<B> anInstance() {
-            return new Builder<>();
+        public static <B extends Serializable> Builder anInstance() {
+            return new Builder();
         }
 
         /**
@@ -142,7 +142,7 @@ public class Instance<D extends Serializable> implements Serializable {
          * @param instanceId instanceId
          * @return Builder
          */
-        public Builder<B> instanceId(final long instanceId) {
+        public Builder instanceId(final long instanceId) {
             this.instanceId = instanceId;
             return this;
         }
@@ -153,7 +153,7 @@ public class Instance<D extends Serializable> implements Serializable {
          * @param proposalNo proposalNo
          * @return Builder
          */
-        public Builder<B> proposalNo(final long proposalNo) {
+        public Builder proposalNo(final long proposalNo) {
             this.proposalNo = proposalNo;
             return this;
         }
@@ -164,7 +164,7 @@ public class Instance<D extends Serializable> implements Serializable {
          * @param grantedValue grantedValue
          * @return Builder
          */
-        public Builder<B> grantedValue(final List<B> grantedValue) {
+        public Builder grantedValue(final List<Command> grantedValue) {
             this.grantedValue = grantedValue;
             return this;
         }
@@ -175,7 +175,7 @@ public class Instance<D extends Serializable> implements Serializable {
          * @param checksum checksum
          * @return Builder
          */
-        public Builder<B> checksum(final String checksum) {
+        public Builder checksum(final String checksum) {
             this.checksum = checksum;
             return this;
         }
@@ -186,7 +186,7 @@ public class Instance<D extends Serializable> implements Serializable {
          * @param state state
          * @return Builder
          */
-        public Builder<B> state(final State state) {
+        public Builder state(final State state) {
             this.state = state;
             return this;
         }
@@ -196,8 +196,8 @@ public class Instance<D extends Serializable> implements Serializable {
          *
          * @return Instance
          */
-        public Instance<B> build() {
-            Instance<B> instance = new Instance<>();
+        public Instance build() {
+            Instance instance = new Instance();
             instance.setInstanceId(instanceId);
             instance.setProposalNo(proposalNo);
             instance.setGrantedValue(grantedValue);

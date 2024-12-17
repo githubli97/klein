@@ -1,19 +1,16 @@
 package com.ofcoder.klein.storage.file;
 
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-
 import com.google.common.collect.Lists;
 import com.ofcoder.klein.spi.ExtensionLoader;
 import com.ofcoder.klein.storage.facade.Instance;
 import com.ofcoder.klein.storage.facade.LogManager;
 import com.ofcoder.klein.storage.facade.config.StorageProp;
 import com.ofcoder.klein.storage.facade.exception.LockException;
+import java.util.List;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 public class FileLogManagerTest {
     LogManager join;
@@ -30,11 +27,12 @@ public class FileLogManagerTest {
 
     @Test(expected = LockException.class)
     public void testUpdateInstance_noLock() {
-        Instance<String> instance = new Instance<>();
+
+        Instance instance = new Instance();
         instance.setProposalNo(1);
         instance.setInstanceId(1);
         instance.setState(Instance.State.PREPARED);
-        instance.setGrantedValue(Lists.newArrayList("Zzz"));
+        instance.setGrantedValue(Lists.newArrayList(new TestStringCommand("Zzz")));
         join.updateInstance(instance);
     }
 
@@ -43,11 +41,11 @@ public class FileLogManagerTest {
         Instance nil = join.getInstance(1);
         Assert.assertNull(nil);
 
-        Instance<String> instance = new Instance<>();
+        Instance instance = new Instance();
         instance.setProposalNo(1);
         instance.setInstanceId(1);
         instance.setState(Instance.State.PREPARED);
-        instance.setGrantedValue(Lists.newArrayList("Zzz"));
+        instance.setGrantedValue(Lists.newArrayList(new TestStringCommand("Zzz")));
 
         join.getLock(instance.getInstanceId()).writeLock().lock();
         join.updateInstance(instance);
@@ -66,17 +64,17 @@ public class FileLogManagerTest {
     @Test()
     public void testGetInstanceNoConfirm() {
 
-        Instance<String> instance1 = new Instance<>();
+        Instance instance1 = new Instance();
         instance1.setProposalNo(1);
         instance1.setInstanceId(1);
         instance1.setState(Instance.State.PREPARED);
-        instance1.setGrantedValue(Lists.newArrayList("Zzz"));
+        instance1.setGrantedValue(Lists.newArrayList(new TestStringCommand("Zzz")));
 
-        Instance<String> instance2 = new Instance<>();
+        Instance instance2 = new Instance();
         instance2.setProposalNo(1);
         instance2.setInstanceId(2);
         instance2.setState(Instance.State.CONFIRMED);
-        instance2.setGrantedValue(Lists.newArrayList("Zzz"));
+        instance2.setGrantedValue(Lists.newArrayList(new TestStringCommand("Zzz")));
 
         join.getLock(instance1.getInstanceId()).writeLock().lock();
         join.updateInstance(instance1);
@@ -88,7 +86,7 @@ public class FileLogManagerTest {
         List instanceNoConfirm = join.getInstanceNoConfirm();
         Assert.assertNotNull(instanceNoConfirm);
         Assert.assertEquals(1, instanceNoConfirm.size());
-        Instance<String> actual = (Instance<String>) instanceNoConfirm.get(0);
+        Instance actual = (Instance) instanceNoConfirm.get(0);
 
         Assert.assertEquals(instance1.getInstanceId(), actual.getInstanceId());
         Assert.assertEquals(instance1.getProposalNo(), actual.getProposalNo());
